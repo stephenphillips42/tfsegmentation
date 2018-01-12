@@ -162,7 +162,7 @@ class Dataset(object):
                 batch_size=batch_size,
                 num_threads=self.opts.num_preprocessing_threads,
                 capacity=5 * batch_size)
-    return self.augment(dict(zip(keys, values)))
+    return dict(zip(keys, values))
 
 class CityscapesDataset(Dataset):
   def __init__(self, opts):
@@ -187,34 +187,20 @@ class CityscapesDataset(Dataset):
   def augment(self, keys, values):
     sample = dict(zip(keys,values))
     coin_flip = np.random.randn() > 0
-    # var = self.crop_percent_variance
-    # rand_h = (1 + (2*tf.random_uniform([1])-1)*var)
-    # rand_w = (1 + (2*tf.random_uniform([1])-1)*var)
-    # crop_h = tf.cast(self.img_size[0]*rand_h, 'int32')
-    # crop_w = tf.cast(self.img_size[1]*rand_w, 'int32')
-    # s_y = (self.img_size[0] - crop_h)
-    # s_x = (self.img_size[1] - crop_w)
-    # rand_y = tf.cast(s_y, 'float32')*tf.random_uniform([1])
-    # rand_x = tf.cast(s_x, 'float32')*tf.random_uniform([1])
-    # crop_y = tf.cast(rand_y, 'int32')
-    # crop_x = tf.cast(rand_x, 'int32')
 
     # Prepare image and labels
     img = tf.image.convert_image_dtype(sample['image'], dtype=tf.float32)
     img = tf.subtract(img, 0.5)
     img = tf.multiply(img, 2.0)
-    labels = tf.reshape(sample['segmentation'], self.img_size + [1])
+    labels = tf.one_hot(sample['segmentation'], self.nclasses)
     if coin_flip:
       img = tf.image.flip_left_right(img)
       labels = tf.image.flip_left_right(labels)
-		img, labels = random_crop_and_pad_image_and_labels(img, labels, )
-    print("GOT HERE")
-    for v in [img, crop_y, crop_x, crop_h, crop_w]:
-      print(v)
-    # img = tf.image.crop_to_bounding_box(img, crop_y, crop_x, crop_h, crop_w)
-    # img = tf.image.resize_images(img, [ self.net_img_size ])
-    # labels = tf.image.crop_to_bounding_box(labels, crop_y, crop_x, crop_h, crop_w)
-    # labels = tf.image.resize_images(labels, [ self.net_img_size ])
+    img, labels = utils.random_crop_image_and_labels(image=img,
+                                                     labels=labels,
+                                                     size=[self.net_img_size]*2,
+                                                     nchannels=3,
+                                                     nclasses=self.nclasses)
     sample['image'] = img
     sample['segmentation'] = labels
 

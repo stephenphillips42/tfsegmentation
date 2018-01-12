@@ -25,7 +25,10 @@ def get_target(opts, sample):
 def get_loss(opts, target, output):
   """Get loss from inputs and outputs"""
   # Get loss
-  cross_entropy = tf.losses.sparse_softmax_cross_entropy(output, target)
+  print(output)
+  print(target)
+  cross_entropy = tf.losses.softmax_cross_entropy(logits=output,
+                                                  onehot_labels=target)
   print("Creating summaries...")
   if opts.full_tensorboard:
     tf.summary.scalar('cross_entropy', cross_entropy)
@@ -34,6 +37,9 @@ def get_loss(opts, target, output):
 
 	# This includes regularization losses
   loss = tf.losses.get_total_loss()
+  print(cross_entropy)
+  print(loss)
+  print(tf.trainable_variables())
   tf.summary.scalar('loss', loss)
   return loss
 

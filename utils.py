@@ -11,7 +11,7 @@ def myprint(x):
   print("DEBUG: {}".format(x))
 
 # Augmentation utils
-def random_crop_and_pad_image_and_labels(image, labels, size):
+def random_crop_image_and_labels(image, labels, size, nchannels, nclasses):
   """Randomly crops `image` together with `labels`.
 
   Args:
@@ -23,18 +23,11 @@ def random_crop_and_pad_image_and_labels(image, labels, size):
   """
   combined = tf.concat([image, labels], axis=2)
   image_shape = tf.shape(image)
-  combined_pad = tf.image.pad_to_bounding_box(
-      combined, 0, 0,
-      tf.maximum(size[0], image_shape[0]),
-      tf.maximum(size[1], image_shape[1]))
-  last_label_dim = tf.shape(labels)[-1]
-  last_image_dim = tf.shape(image)[-1]
   combined_crop = tf.random_crop(
-      combined_pad,
-      size=tf.concat([size, [last_label_dim + last_image_dim]],
-                     axis=0))
-  return (combined_crop[:, :, :last_image_dim],
-          combined_crop[:, :, last_image_dim:])
+      combined,
+      size=size + [nchannels + nclasses])
+  return (combined_crop[:, :, :nchannels],
+          combined_crop[:, :, nchannels:])
 
 
 # Activation utils

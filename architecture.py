@@ -97,8 +97,18 @@ def network(x, opts, regularizer=None, debug=False):
 
     for i, l in enumerate(layers):
       pr("{}: {}".format(i, l))
+    return layers
 
-
+def build_architecture(opts, sample):
+  opts.architecture = {}
+  opts.architecture['nlayers'] = 6
+  opts.architecture['kernel_sizes'] = [ 5, 5, 3, 3, 3, 3 ]
+  opts.architecture['filters'] = [ 64, 128, 256, 256, 512, 1024 ]
+  opts.architecture['paddings'] = [ 'same' ] * 7 
+  opts.architecture['activation'] = utils.activation(opts.activation_type)
+  opts.architecture['embedding_size'] = 2048
+  return network(sample['image'], opts, regularizer=None)
+  
 
 if __name__ == '__main__':
   opts = options.get_opts()
