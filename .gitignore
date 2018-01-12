@@ -99,3 +99,13 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Personal
+save/*
+data/*.tfrecords
+cityscapes/leftImg8bit/*
+cityscapes/gtFine/*
+cityscapes/vehicle/*
+cityscapes/*csv
+
+
